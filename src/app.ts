@@ -6,6 +6,7 @@ import config from './app/config'
 import { globalErrorHandler } from './app/middleware/globalErrorHandler'
 import { notFound } from './app/middleware/notFound'
 import { AuthRoutes } from './app/module/auth/auth.route'
+import { BoardMembersRoutes } from './app/module/board-members/board-members.route'
 import { BoardsRoutes } from './app/module/boards/boards.route'
 
 const app: Application = express()
@@ -26,6 +27,7 @@ app.use(cookieParser())
 
 app.use('/api/v1/auth', AuthRoutes)
 app.use('/api/v1/boards', BoardsRoutes)
+app.use('/api/v1/boards/:boardId/members', BoardMembersRoutes)
 
 // Basic route
 app.get('/', async (req: Request, res: Response) => {
