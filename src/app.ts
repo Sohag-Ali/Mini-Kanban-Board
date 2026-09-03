@@ -9,6 +9,7 @@ import { AuthRoutes } from './app/module/auth/auth.route'
 import { BoardMembersRoutes } from './app/module/board-members/board-members.route'
 import { BoardsRoutes } from './app/module/boards/boards.route'
 import { ColumnRoutes } from './app/module/cloumns/column.route'
+import { TaskRoutes } from './app/module/tasks/task.route'
 
 const app: Application = express()
 
@@ -30,6 +31,7 @@ app.use('/api/v1/auth', AuthRoutes)
 app.use('/api/v1/boards', BoardsRoutes)
 app.use('/api/v1/boards/:boardId/members', BoardMembersRoutes)
 app.use('/api/v1/boards/:boardId/columns', ColumnRoutes)
+app.use('/api/v1/columns/:columnId/tasks', TaskRoutes)
 
 // Basic route
 app.get('/', async (req: Request, res: Response) => {
