@@ -3,9 +3,9 @@ enum BoardRole {
   EDITOR
   VIEWER
 }
+
 enum UserStatus {
   ACTIVE
   BLOCKED
   DELETED
-  
 }

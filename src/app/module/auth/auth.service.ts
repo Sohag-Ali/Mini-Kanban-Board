@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs'
 import { JwtPayload, SignOptions } from 'jsonwebtoken'
 
+import { UserStatus } from '../../../generated/prisma/enums'
 import config from '../../config'
 import { prisma } from '../../lib/prisma'
 import { jwtUtils } from '../../utils/jwt'
@@ -31,20 +32,15 @@ const registerPatient = async (payload: IRegisterPatientPayload) => {
             email,
             password: hashedPassword,
             emailVerified: false,
-            patient: {
-                create: { name, email },
-            },
         },
         omit: { password: true },
-        include: { patient: true },
     })
 
-    const { patient, ...user } = createdUser
+    const { ...user } = createdUser
     const jwtPayload = {
         userId: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
     }
 
     const accessToken = jwtUtils.createToken(
@@ -61,7 +57,6 @@ const registerPatient = async (payload: IRegisterPatientPayload) => {
 
     return {
         user,
-        patient,
         accessToken,
         refreshToken
     }
@@ -97,7 +92,6 @@ const loginUser = async (payload: ILoginUserPayload) => {
         userId: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
     }
 
     const accessToken = jwtUtils.createToken(
@@ -122,9 +116,6 @@ const getMe = async (user: IRequestUser) => {
     const isUserExists = await prisma.user.findUnique({
         where: {
             id: user.userId,
-        },
-        include: {
-            patient: true,
         },
         omit: {
             password: true,
@@ -159,8 +150,7 @@ const refreshToken = async (token: string) => {
         userId: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
-    }
+}
 
     const accessToken = jwtUtils.createToken(
         jwtPayload,
