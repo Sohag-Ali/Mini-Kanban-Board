@@ -1,0 +1,15 @@
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+
+  columnId    String
+  position    Int
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  column    Column   @relation(fields: [columnId], references: [id], onDelete: Cascade)
+
+  @@index([columnId, position])
+}

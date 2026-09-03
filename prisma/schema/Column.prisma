@@ -1,0 +1,13 @@
+model Column {
+  id        String   @id @default(cuid())
+  name      String
+  boardId   String
+  position  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  board Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  tasks Task[]
+
+  @@index([boardId, position])
+}

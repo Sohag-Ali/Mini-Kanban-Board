@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs'
 import { JwtPayload, SignOptions } from 'jsonwebtoken'
-import { Role, UserStatus } from '../../../generated/prisma/enums'
+
 import config from '../../config'
 import { prisma } from '../../lib/prisma'
 import { jwtUtils } from '../../utils/jwt'
@@ -30,8 +30,6 @@ const registerPatient = async (payload: IRegisterPatientPayload) => {
             name,
             email,
             password: hashedPassword,
-            role: Role.PATIENT,
-            status: UserStatus.ACTIVE,
             emailVerified: false,
             patient: {
                 create: { name, email },
