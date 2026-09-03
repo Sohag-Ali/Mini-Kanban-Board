@@ -2,10 +2,11 @@ import { NextFunction, Request, Response } from 'express';
 import httpStatus from "http-status";
 import { Prisma } from '../../generated/prisma/client';
 import config from '../config';
+import { AppError } from '../utils/appError';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export const globalErrorHandler = async (
-    err: any,
+    err: unknown,
     _req: Request,
     res: Response,
     _next: NextFunction,
@@ -15,11 +16,14 @@ export const globalErrorHandler = async (
     }
 
     let statusCode : number = httpStatus.INTERNAL_SERVER_ERROR;
-    let errorMessage = err.message || "Internal Server Error";
-    let errorName = err.name || "Internal Server Error";
+    const error = err instanceof Error ? err : new Error("Internal Server Error");
+    let errorMessage = error.message || "Internal Server Error";
+    let errorName = error.name || "Internal Server Error";
     // let errorDetails = err.stack
 
-    if (err instanceof Prisma.PrismaClientValidationError) {
+    if (err instanceof AppError) {
+        statusCode = err.statusCode
+    } else if (err instanceof Prisma.PrismaClientValidationError) {
         statusCode = httpStatus.BAD_REQUEST;
         errorMessage = "You have provided incorrect field type or missing fields"
     } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
@@ -44,20 +48,18 @@ export const globalErrorHandler = async (
     } else if (err instanceof Prisma.PrismaClientUnknownRequestError) {
         statusCode = httpStatus.INTERNAL_SERVER_ERROR;
         errorMessage = "Error occurred during query execution"
-    } else if (err instanceof Error) {
-        errorMessage = err.message
     }
 
 
 
 
 
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+    res.status(statusCode).json({
         success: false,
         statusCode: statusCode || httpStatus.INTERNAL_SERVER_ERROR,
         name: config.node_env === 'development' ? errorName : "Internal Server Error",
         message: config.node_env === 'development' ? errorMessage : "Internal Server Error",
-        error: config.node_env === 'development' ? err : undefined,
-        stack: config.node_env  === 'development' ? err.stack : undefined,
+        error: config.node_env === 'development' ? error : undefined,
+        stack: config.node_env  === 'development' ? error.stack : undefined,
     })
 }
