@@ -7,9 +7,9 @@ const router = Router()
 
 
 router.post('/', auth(), BoardsController.createBoards )
-router.get('/',BoardsController.getAllBoards )
-router.get('/:id',BoardsController.getBoardById)
-router.patch('/:id',BoardsController.updateBoard)
-router.delete('/:id',BoardsController.deleteBoard)
+router.get('/', auth(), BoardsController.getAllBoards )
+router.get('/:id', auth(), BoardsController.getBoardById)
+router.patch('/:id', auth(), BoardsController.updateBoard)
+router.delete('/:id', auth(), BoardsController.deleteBoard)
 
 export const BoardsRoutes = router

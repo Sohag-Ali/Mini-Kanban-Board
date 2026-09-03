@@ -2,7 +2,7 @@ import httpStatus from 'http-status'
 import { Prisma } from '../../../generated/prisma/client'
 import { prisma } from '../../lib/prisma'
 import { AppError } from '../../utils/appError'
-import { ICreateBoardPayload } from './boards.interface'
+import { ICreateBoardPayload, IUpdateBoardPayload } from './boards.interface'
 
 
 
@@ -32,20 +32,57 @@ const create = async (userId: string, createBoardDto: ICreateBoardPayload) => {
     }
 }
 
-const getAllBoards = async () => {
-
+const findAll = async (userId: string) => {
+    return prisma.board.findMany({
+        where: { ownerId: userId },
+        orderBy: { createdAt: 'desc' },
+    })
 }
 
-const getBoardById = async (id: string) => {
+const findOne = async (userId: string, boardId: string) => {
+    const board = await prisma.board.findUnique({
+        where: { id: boardId },
+    })
 
+    if (!board) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Board not found')
+    }
+
+    if (board.ownerId !== userId) {
+        throw new AppError(httpStatus.FORBIDDEN, 'You do not have access to this board')
+    }
+
+    return board
 }
 
-const updateBoard = async () => {
+const update = async (
+    userId: string,
+    boardId: string,
+    updateBoardDto: IUpdateBoardPayload,) => {
+    await findOne(userId, boardId)
 
+    try {
+        return await prisma.board.update({
+            where: { id: boardId },
+            data: {
+                name: updateBoardDto.name,
+            },
+        })
+    } catch (_error) {
+        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to update board')
+    }
 }
 
-const deleteBoard = async () => {
+const remove = async (userId: string, boardId: string) => {
+    await findOne(userId, boardId)
 
+    try {
+        return await prisma.board.delete({
+            where: { id: boardId },
+        })
+    } catch (_error) {
+        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to delete board')
+    }
 }
 
 
@@ -54,8 +91,8 @@ const deleteBoard = async () => {
 
 export const BoardsService = {
     create,
-    getAllBoards,
-    getBoardById,
-    updateBoard,
-    deleteBoard,
+    findAll,
+    findOne,
+    update,
+    remove,
 }
